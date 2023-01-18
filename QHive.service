@@ -1,0 +1,12 @@
+[Unit]
+Description=Offense copying from QRadar to TheHive
+Requires=thehive.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/Hscripts/
+ExecStart=/usr/bin/python3 /opt/Hscripts/QHive/qhive.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
