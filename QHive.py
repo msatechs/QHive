@@ -266,7 +266,8 @@ def Live_Fetch():
                 'source': None,
                 'sourceRef': None,
                 'title': None,
-                'tlp': 0,
+                'tlp': 3,
+                'pap': 2,
                 'type': None,
                 'customFields': None
                 }
@@ -346,7 +347,7 @@ def Live_Fetch():
             alert['title'] = single_alert_J['description']
             alert['description'] = single_alert_J['description']
             alert['date'] = single_alert_J['start_time']
-            alert['type'] = 'Qradar Offense'
+            alert['type'] = 'QRADAR'
             alert['source'] = single_alert_J['offense_source']
             srcref = f"{client}{urljoin(Qradar_url, Offense_id_url+str(offense_id))}{single_alert_J['first_persisted_time']}"
             alert['sourceRef'] = str(offense_id)+':'+(str(md5(srcref.encode()).hexdigest())).upper()
@@ -356,66 +357,90 @@ def Live_Fetch():
                     "string": client,
                     "order": 0
                     },
-                "closing-time": {
-                    "date": single_alert_J['close_time'],
-                    "order": 13
-                    },
                 "trigger-date": {
                     "date": single_alert_J['start_time'],
-                    "order": 10
+                    "order": 1
                     },
-                "closing-reason": {
-                    "string": closing_gl,
+                "offense-url": {
+                    "string" : urljoin(Qradar_url, Offense_id_url)+str(offense_id),
+                    "order": 3
+                },
+                "event-count": {
+                    "integer": single_alert_J['event_count'],
                     "order": 14
-                    },
-                "notes": {
-                    "string": note,
-                    "order": 15
-                    },
-                "follow-up": {
-                    "boolean": single_alert_J['follow_up'],
-                    "order": 9
                     },
                 "log-sources": {
                     "string": log_sources,
-                    "order": 3
+                    "order": 4
                     },
-                "assigned-to": {
-                    "string": single_alert_J['assigned_to'],
+                "source-network": {
+                    "string": single_alert_J['source_network'],
+                    "order": 6
+                    },
+                "destination-networks": {
+                    "string": dest_networks,
                     "order": 8
                     },
                 "source-ip": {
                     "string": source_ip,
-                    "order": 6
-                    },
-                "status": {
-                    "string": single_alert_J['status'],
-                    "order": 11
-                    },
-                "source-network": {
-                    "string": single_alert_J['source_network'],
-                    "order": 4
-                    },
-                "destination-networks": {
-                    "string": dest_networks,
                     "order": 5
                     },
                 "destination-ip": {
                     "string": destination_ip,
                     "order": 7
                     },
+                "assigned-to": {
+                    "string": single_alert_J['assigned_to'],
+                    "order": 15
+                    },
+                "follow-up": {
+                    "boolean": single_alert_J['follow_up'],
+                    "order": 16
+                    },
+                "status": {
+                    "string": single_alert_J['status'],
+                    "order": 17
+                    },
                 "closing-user": {
                     "string": single_alert_J['closing_user'],
+                    "order": 18
+                    },
+                "closing-time": {
+                    "date": single_alert_J['close_time'],
+                    "order": 19
+                    },
+                "closing-reason": {
+                    "string": closing_gl,
+                    "order": 20
+                    },
+                "notes": {
+                    "string": note,
+                    "order": 21
+                    },
+                "host-os": {
+                    "string": "N/A",
                     "order": 12
                     },
-                "event-count": {
-                    "integer": single_alert_J['event_count'],
-                    "order": 2
+                "user-name": {
+                    "string": "N/A",
+                    "order": 9
                     },
-                "offense-url": {
-                    "string" : urljoin(Qradar_url, Offense_id_url)+str(offense_id),
-                    "order": 1
-                }
+                "process-name": {
+                    "string": "N/A",
+                    "order": 10
+                    },
+                "process-signature": {
+                    "string": "N/A",
+                    "order": 11
+                    },
+                "original-event": {
+                    "string": "N/A",
+                    "order": 13
+                    },
+                "reason": {
+                    "string": "N/A",
+                    "order": 2
+                    }
             }
             #! Create alert
             try:
