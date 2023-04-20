@@ -434,6 +434,30 @@ def Live_Fetch():
                 "notes": {
                     "string": note,
                     "order": 21
+                    },
+                "host-os": {
+                    "string": "N/A",
+                    "order": 12
+                    },
+                "user-name": {
+                    "string": "N/A",
+                    "order": 9
+                    },
+                "process-name": {
+                    "string": "N/A",
+                    "order": 10
+                    },
+                "process-signature": {
+                    "string": "N/A",
+                    "order": 11
+                    },
+                "original-event": {
+                    "string": "N/A",
+                    "order": 13
+                    },
+                "reason": {
+                    "string": "N/A",
+                    "order": 2
                     }
             }
             #! Create alert
