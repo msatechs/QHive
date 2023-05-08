@@ -293,7 +293,7 @@ def Live_Fetch():
             #! Get Log sources
             try:
                 if len(single_alert_J['log_sources']) > 1:
-                    log_sources = f"Multiple({len(single_alert_J['log_sources'])})"
+                    log_sources = f"Multiple ({len(single_alert_J['log_sources'])})"
                 elif len(single_alert_J['log_sources']) == 1:
                     log_sources = single_alert_J['log_sources'][0]['name']
                 else:
@@ -302,7 +302,7 @@ def Live_Fetch():
                 log_sources = None
             #! Get Destination networks
             if len(single_alert_J['destination_networks']) > 1:
-                dest_networks = f"Multiple({len(single_alert_J['destination_networks'])})"
+                dest_networks = f"Multiple ({len(single_alert_J['destination_networks'])})"
             elif len(single_alert_J['destination_networks']) == 1:
                 dest_networks = single_alert_J['destination_networks'][0]
             else:
@@ -310,7 +310,7 @@ def Live_Fetch():
             #! Get source and destination IPs
             if single_alert_J['source_count'] > 1:
                 nr_src = True
-                source_ip = f"Multiple({single_alert_J['source_count']})"
+                source_ip = f"Multiple ({single_alert_J['source_count']})"
             elif single_alert_J['source_count'] == 1:
                 nr_src = True
                 src_id = single_alert_J['source_address_ids'][0]
@@ -322,7 +322,7 @@ def Live_Fetch():
             #!
             if single_alert_J['local_destination_count'] > 1:
                 nr_dst = True
-                destination_ip = f"Multiple({single_alert_J['local_destination_count']})"
+                destination_ip = f"Multiple ({single_alert_J['local_destination_count']})"
             elif single_alert_J['local_destination_count'] == 1:
                 nr_dst = True
                 dest_id = single_alert_J['local_destination_address_ids'][0]
