@@ -38,7 +38,7 @@ Qradar_url = ClientInfo["Qradar_url"]
 
 #? Tokens and APIs
 QRadar_token = ClientInfo["QRadar_token"]
-H_API_KEY = SOCInfo["H_API_KEY"] #! qhive@brm
+H_API_KEY = SOCInfo["H_API_KEY"] #! qhive@client
 
 #? Number of offenses to be imported
 nbr_offenses = int(ConfigInfo["nbr_offenses"])
@@ -51,6 +51,9 @@ nbr_sec_timeout = int(ConfigInfo["nbr_sec_timeout"])
 
 #? Maximum number of observables to get
 limit_art = int(ConfigInfo["limit_art"])
+
+#? Max size of log before compression
+max_comp_size = int(ConfigInfo["max_comp_size"])
 
 #* Dict name
 id_dict_f = LogInfo["id_dict_f"]
@@ -87,6 +90,66 @@ Offense_id_url = '/console/do/sem/offensesummary?appName=Sem&pageId=OffenseSumma
 
 #*########################################### FUNCTIONS ################################################################
 
+#! ZIP log files
+def lognzip(loglvl, logmsg):
+    import tarfile
+    import os
+    counter = 1
+    if loglvl == "info":
+        try:
+            #& get size
+            f_zise = os.stat(log_file)
+            if f_zise.st_size > max_comp_size:    
+                tar_name = log_file+'-'+str(counter)+'.tar.gz'
+                while os.path.exists(tar_name):
+                    counter += 1
+                    tar_name = log_file+'-'+str(counter)+'.tar.gz'
+                #& Compress     
+                with tarfile.open(tar_name, "w:gz", compresslevel=9) as tar:
+                    tar.add(log_file, arcname=os.path.basename('.'.join(tar_name.split('.')[:-2])))
+                #& Empty file
+                open(log_file, 'w').close()
+        except FileNotFoundError:
+            pass
+        #& Log
+        log.info(f"{logmsg}[+]")
+    elif loglvl == "error":
+        try:
+            #& get size
+            f_zise = os.stat(log_file)
+            if f_zise.st_size > max_comp_size:    
+                tar_name = log_file+'-'+str(counter)+'.tar.gz'
+                while os.path.exists(tar_name):
+                    counter += 1
+                    tar_name = log_file+'-'+str(counter)+'.tar.gz'
+                #& Compress     
+                with tarfile.open(tar_name, "w:gz", compresslevel=9) as tar:
+                    tar.add(log_file, arcname=os.path.basename('.'.join(tar_name.split('.')[:-2])))
+                #& Empty file
+                open(log_file, 'w').close()
+        except FileNotFoundError:
+            pass
+        #& Log
+        log.error(f"{logmsg}[-]")
+    elif loglvl == "critical":
+        try:
+            #& get size
+            f_zise = os.stat(log_file)
+            if f_zise.st_size > max_comp_size:    
+                tar_name = log_file+'-'+str(counter)+'.tar.gz'
+                while os.path.exists(tar_name):
+                    counter += 1
+                    tar_name = log_file+'-'+str(counter)+'.tar.gz'
+                #& Compress     
+                with tarfile.open(tar_name, "w:gz", compresslevel=9) as tar:
+                    tar.add(log_file, arcname=os.path.basename('.'.join(tar_name.split('.')[:-2])))
+                #& Empty file
+                open(log_file, 'w').close()
+        except:
+            pass
+        #& Log
+        log.critical(f"{logmsg}[-]")
+
 #! Get alert from QRadar
 def get_alert(ssl_ver = True):
     offense_api = '/api/siem/offenses'
@@ -101,13 +164,13 @@ def get_Q():
         offense_json = json.loads(get_alert(False).content)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
-            log.critical("No route to host. Retrying after 10 seconds...")
+            log.critical("No route to host. Retrying after 10 seconds...[-]")
             time.sleep(10)
         else:
             if nbr_sec_timeout > 0:
-                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...")
+                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
             else:
-                log.error(f"{E1}. Retrying...")
+                log.error(f"{E1}. Retrying...[-]")
             time.sleep(nbr_sec_timeout)
         get_Q()
 
@@ -149,13 +212,13 @@ def get_src_id(idd):
         get_id_res_json = json.loads(get_id('source_addresses', "", idd, False).content)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
-            log.critical("No route to host. Retrying after 10 seconds...")
+            log.critical("No route to host. Retrying after 10 seconds...[-]")
             time.sleep(10)
         else:
             if nbr_sec_timeout > 0:
-                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...")
+                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
             else:
-                log.error(f"{E1}. Retrying...")
+                log.error(f"{E1}. Retrying...[-]")
             time.sleep(nbr_sec_timeout)
         get_src_id(idd)
 
@@ -166,13 +229,13 @@ def get_dst_id(idd):
         get_id_res_json = json.loads(get_id('local_destination_addresses', "", idd, False).content)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
-            log.critical("No route to host. Retrying after 10 seconds...")
+            log.critical("No route to host. Retrying after 10 seconds...[-]")
             time.sleep(10)
         else:
             if nbr_sec_timeout > 0:
-                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...")
+                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
             else:
-                log.error(f"{E1}. Retrying...")
+                log.error(f"{E1}. Retrying...[-]")
             time.sleep(nbr_sec_timeout)
         get_dst_id(idd)
 
@@ -183,13 +246,13 @@ def get_close_id(idd):
         get_id_res_json = json.loads(get_id('offense_closing_reasons', "", idd, False).content)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
-            log.critical("No route to host. Retrying after 10 seconds...")
+            log.critical("No route to host. Retrying after 10 seconds...[-]")
             time.sleep(10)
         else:
             if nbr_sec_timeout > 0:
-                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...")
+                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
             else:
-                log.error(f"{E1}. Retrying...")
+                log.error(f"{E1}. Retrying...[-]")
             time.sleep(nbr_sec_timeout)
         get_close_id(idd)
 
@@ -200,13 +263,13 @@ def get_notes():
         get_note_list = json.loads(get_id('offenses', offense_id, '/notes', False).content)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
-            log.critical("No route to host. Retrying after 10 seconds...")
+            log.critical("No route to host. Retrying after 10 seconds...[-]")
             time.sleep(10)
         else:
             if nbr_sec_timeout > 0:
-                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...")
+                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
             else:
-                log.error(f"{E1}. Retrying...")
+                log.error(f"{E1}. Retrying...[-]")
             time.sleep(nbr_sec_timeout)
         get_notes()
 
@@ -225,17 +288,17 @@ def get_A(al_id):
         get_alert_json = read_alert(al_id, False)
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
-            log.critical("No route to host. Retrying after 10 seconds...")
+            log.critical("No route to host. Retrying after 10 seconds...[-]")
             time.sleep(10)
         else:
             if nbr_sec_timeout > 0:
-                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...")
+                log.error(f"{E1}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
             else:
-                log.error(f"{E1}. Retrying...")
+                log.error(f"{E1}. Retrying...[-]")
             time.sleep(nbr_sec_timeout)
         get_A(al_id)
     except json.decoder.JSONDecodeError:
-        logging.critical(f"TheHive{client} might be down. Check if it's running")
+        log.critical(f"TheHive{client} might be down. Check if it's running[-]")
         time.sleep(nbr_sec_timeout)
         get_A(al_id)
 
@@ -263,17 +326,17 @@ def Live_Fetch():
     try:
         offense_json['http_response']
         if offense_json['http_response']['code'] == 401:
-            log.critical(offense_json['http_response']['message'])
+            log.critical(f"{offense_json['http_response']['message']}[-]")
             sys.exit()
     except:
         pass
     if len(offense_json) == 0:
-        log.info("No alerts were found")
+        log.info("No alerts were found[!]")
     elif "You are unauthorized" in json.dumps(offense_json):
-        log.error(offense_json)
+        log.error(f"{offense_json}[-]")
 
     else:
-        log.info(f"Batch of alerts acquired. Copying {nbr_offenses} alerts from QRadar{client} to TheHive{client}...")
+        log.info(f"Batch of alerts acquired. Copying {nbr_offenses} alerts from QRadar{client} to TheHive{client}...[+]")
         #! Get response from Qradar
         for single_alert_J in offense_json:
             #! Clean Alert
@@ -441,15 +504,15 @@ def Live_Fetch():
                 Hive_response = post_alert(False)
             except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError) as E6:
                 if 'No route to host' in str(E6):
-                    logging.critical('No route to host. Exiting...')
+                    log.critical('No route to host. Exiting...[-]')
                     continue
             try:
                 J_Hive_response = json.loads(Hive_response.content)
             except UnboundLocalError:
-                logging.critical(f"Failed to get a response from TheHive{client}. Check if it's running")
+                log.critical(f"Failed to get a response from TheHive{client}. Check if it's running[-]")
                 continue
             except json.decoder.JSONDecodeError:
-                logging.critical(f"TheHive{client} might be down. Check if it's running")
+                log.critical(f"TheHive{client} might be down. Check if it's running[-]")
                 continue
             if Hive_response.status_code == 201:
                 alert_id_Hive = J_Hive_response['_id']
@@ -475,7 +538,7 @@ def Live_Fetch():
                         elif "Observable already exists" in json.loads(art_res.content)['failure'][0]['message']:
                             pass
                         else:
-                            log.error(art_res.content.decode('utf-8'))
+                            log.error(f"{art_res.content.decode('utf-8')}[!]")
                 #! Send Destination IP Artifacts
                 if nr_dst:
                     for i in single_alert_J['local_destination_address_ids'][:limit_art]:
@@ -488,8 +551,8 @@ def Live_Fetch():
                         elif "Observable already exists" in json.loads(art_res.content)['failure'][0]['message']:
                             pass
                         else:
-                            log.error(art_res.content.decode('utf-8'))
-                log.info(f"Creation of Alert {alert_id_Hive} Successful - QRadar offense id: {offense_id}")
+                            log.error(f"{art_res.content.decode('utf-8')}[!]")
+                log.info(f"Creation of Alert {alert_id_Hive} Successful - QRadar offense id: {offense_id}[+]")
             elif "already exist in" in J_Hive_response['message']:
                 try:
                     with open(id_dict_f, 'r') as r:
@@ -497,14 +560,14 @@ def Live_Fetch():
                     try:
                         alert_id_Hive = id_dict[str(offense_id)]
                     except KeyError:
-                        log.error("Alert exists but Id mapping couldn't be executed")
+                        log.error("Alert exists but Id mapping couldn't be executed[!]")
                         continue
                     #! Check for differences
                     #! Read our alert
                     get_A(alert_id_Hive)
                     read_res = get_alert_json
                     if read_res.status_code != 200:
-                        log.error(read_res.content.decode('utf-8'))
+                        log.error(f"{read_res.content.decode('utf-8')}[!]")
                     else:
                         al_cl_usr = json.loads(read_res.content)['customFields']['closing-user']['string']
                         al_cl_reason = json.loads(read_res.content)['customFields']['closing-reason']['string']
@@ -522,10 +585,10 @@ def Live_Fetch():
                                 }
                                 up_res = update_alert(offense_id, offense_data, False)
                                 if up_res.status_code == 200:
-                                    log.info(f"Changes found in TheHive. Offense {offense_id} successfully updated")
+                                    log.info(f"Changes found in TheHive. Offense {offense_id} successfully updated[+]")
                                     continue
                                 else:
-                                    log.error(up_res.content.decode('utf-8'))
+                                    log.error(f"{up_res.content.decode('utf-8')}[!]")
                         elif single_alert_J['status'] != 'CLOSED' and al_status == 'CLOSED':
                             #! Fix closing reason
                             if al_cl_reason != None:
@@ -542,7 +605,7 @@ def Live_Fetch():
                             }
                             up_res = update_alert(offense_id, offense_data, False)
                             if up_res.status_code == 200:
-                                log.info(f"Offense {offense_id} successfully closed")
+                                log.info(f"Offense {offense_id} successfully closed [+]")
                                 #! Fix note
                                 cl_reason_2 = al_cl_reason.split(":")[1]
                                 note_data = {
@@ -551,10 +614,10 @@ def Live_Fetch():
                                 #! Create note
                                 note_res = up_note(offense_id, note_data, False)
                                 if note_res.status_code != 201:
-                                    log.error(note_res.content.decode('utf-8'))
+                                    log.error(f"{note_res.content.decode('utf-8')}[!]")
                                 continue
                             else:
-                                log.error(up_res.content.decode('utf-8'))
+                                log.error(f"{up_res.content.decode('utf-8')}[!]")
                     #! Patch Alert
                     patch_response = patch_alert(alert_id_Hive, False)
                     if patch_response.status_code == 200:
@@ -570,7 +633,7 @@ def Live_Fetch():
                                 elif "Observable already exists" in json.loads(art_res.content)['failure'][0]['message']:
                                     pass
                                 else:
-                                    log.error(art_res.content.decode('utf-8'))
+                                    log.error(f"{art_res.content.decode('utf-8')}[!]")
                         #! Send Destination IP Artifacts
                         if nr_dst:
                             for i in single_alert_J['local_destination_address_ids'][:limit_art]:
@@ -583,22 +646,27 @@ def Live_Fetch():
                                 elif "Observable already exists" in json.loads(art_res.content)['failure'][0]['message']:
                                     pass
                                 else:
-                                    log.error(art_res.content.decode('utf-8'))
+                                    log.error(f"{art_res.content.decode('utf-8')}[!]")
 
-                        log.info(f"Update of Alert with Offense id {offense_id} Successful")
+                        log.info(f"Update of Alert with Offense id {offense_id} Successful[+]")
                     else:
-                        log.error(patch_response.content.decode('utf-8'))
+                        log.error(f"{patch_response.content.decode('utf-8')}[-]")
                 except FileNotFoundError:
-                    log.error("Alert exists but the Id mapping file was not found")
+                    log.error("Alert exists but the Id mapping file was not found[-]")
             elif "CustomField" in J_Hive_response['message'] and "not found" in J_Hive_response['message']:
-                log.error("Some CustomFields are not defined")
+                log.error("Some CustomFields are not defined[-]")
             else:
-                log.error(Hive_response.content.decode('utf-8'))
+                log.error(f"{Hive_response.content.decode('utf-8')}[-]")
 
 if __name__ == "__main__":
-    while True:
-        Live_Fetch()
-        if nbr_sec > 0:
-            log.info(f"Sleeping for {nbr_sec} seconds...")
-        time.sleep(nbr_sec)
+    try:
+        while True:
+            Live_Fetch()
+            if nbr_sec > 0:
+                log.info(f"Sleeping for {nbr_sec} seconds...[+]")
+            time.sleep(nbr_sec)
+    except KeyboardInterrupt:
+        lognzip("critical", "Service Stopped by a KillSignal ")
+    except Exception as E:
+        lognzip("critical", f"{E} ")
 

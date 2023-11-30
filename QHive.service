@@ -6,6 +6,7 @@ Requires=thehive.service
 Type=simple
 WorkingDirectory=/opt/Hscripts/
 ExecStart=/usr/bin/python3 /opt/Hscripts/QHive/qhive.py
+KillSignal=SIGINT
 Restart=always
 
 [Install]
