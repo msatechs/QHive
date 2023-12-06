@@ -162,6 +162,13 @@ def get_Q():
     global offense_json
     try:
         offense_json = json.loads(get_alert(False).content)
+    except json.decoder.JSONDecodeError as E0:
+        if nbr_sec_timeout > 0:
+            log.critical(f"{E0}. Retrying after "+str(nbr_sec_timeout)+" seconds...[-]")
+        else:
+            log.critical(f"{E0}. Retrying...[-]")
+        time.sleep(nbr_sec_timeout)
+        get_Q()
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as E1:
         if 'No route to host' in str(E1):
             log.critical("No route to host. Retrying after 10 seconds...[-]")
