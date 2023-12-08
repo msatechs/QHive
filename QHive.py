@@ -487,6 +487,10 @@ def Live_Fetch():
                     },
                 "status": {
                     "string": single_alert_J['status'],
+                    "order": 22
+                    },
+                "offense-id": {
+                    "string": str(offense_id),
                     "order": 17
                     },
                 "closing-user": {
