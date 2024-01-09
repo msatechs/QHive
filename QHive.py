@@ -449,6 +449,10 @@ def Live_Fetch():
                     "date": single_alert_J['start_time'],
                     "order": 1
                     },
+                "siem": {
+                    "string": 'QRADAR',
+                    "order": 2
+                    },
                 "offense-url": {
                     "string" : urljoin(Qradar_url, Offense_id_url)+str(offense_id),
                     "order": 3
