@@ -9,6 +9,7 @@ import logging
 from hashlib import md5
 from configparser import ConfigParser
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import traceback
 
 #?########################################### CONFIG ##############################################################
 
@@ -55,6 +56,12 @@ limit_art = int(ConfigInfo["limit_art"])
 #? Max size of log before compression
 max_comp_size = int(ConfigInfo["max_comp_size"])
 
+#? Proxy
+try:
+    proxy = ConfigInfo["proxy"]
+except:
+    pass
+
 #* Dict name
 id_dict_f = LogInfo["id_dict_f"]
 
@@ -65,6 +72,8 @@ log_file = LogInfo["log_file"]
 err_log_file = LogInfo["err_log_file"]
 
 #?########################################### CONFIG ##############################################################
+import os
+os.makedirs('/'.join(log_file.split('/')[0:-1]), exist_ok=True)
 
 #! Logging
 log = logging.getLogger()
@@ -431,13 +440,23 @@ def Live_Fetch():
                 sev = 2
             else:
                 sev = 1
+            #! Source
+            try:
+                for x in single_alert_J['log_sources']:
+                    if x["type_name"] != "EventCRE":
+                        log_source = x["name"]
+                        break
+                    else:
+                        log_source = "N/A"
+            except:
+                log_source = "N/A" 
             #! Fill alert with Qradar values
             alert['title'] = single_alert_J['description']
             alert['description'] = single_alert_J['description']
             alert['date'] = single_alert_J['start_time']
             alert['type'] = 'QRADAR'
-            alert['source'] = single_alert_J['offense_source']
-            srcref = f"{client}{urljoin(Qradar_url, Offense_id_url+str(offense_id))}{single_alert_J['first_persisted_time']}"
+            alert['source'] = log_source
+            srcref = f"{client}{urljoin(Qradar_url, Offense_id_url+str(offense_id))}"
             alert['sourceRef'] = str(offense_id)+':'+(str(md5(srcref.encode()).hexdigest())).upper()
             alert['severity'] = sev
             alert['customFields'] = {
@@ -546,7 +565,7 @@ def Live_Fetch():
                     for i in single_alert_J['source_address_ids'][:limit_art]:
                         get_src_id(i)
                         art_ip = get_id_res_json['source_ip']
-                        art_data = {'dataType': 'ip','data': art_ip, 'message': 'Source IP', 'tags':['Source IP']}
+                        art_data = {'dataType': 'ip','data': art_ip, 'message': 'Source IP', 'tags':['Source IP', str(client)]}
                         art_res = post_art(alert_id_Hive, art_data, False)
                         if art_res.status_code == 201:
                             pass
@@ -559,7 +578,7 @@ def Live_Fetch():
                     for i in single_alert_J['local_destination_address_ids'][:limit_art]:
                         get_dst_id(i)
                         art_ip = get_id_res_json['local_destination_ip']
-                        art_data = {'dataType': 'ip','data': art_ip, 'message': 'Destination IP', 'tags':['Destination IP']}
+                        art_data = {'dataType': 'ip','data': art_ip, 'message': 'Destination IP', 'tags':['Destination IP', str(client)]}
                         art_res = post_art(alert_id_Hive, art_data, False)
                         if art_res.status_code == 201:
                             pass
@@ -641,7 +660,7 @@ def Live_Fetch():
                             for i in single_alert_J['source_address_ids'][:limit_art]:
                                 get_src_id(i)
                                 art_ip = get_id_res_json['source_ip']
-                                art_data = {'dataType': 'ip','data': art_ip, 'message': 'Source IP', 'tags':['Source IP']}
+                                art_data = {'dataType': 'ip','data': art_ip, 'message': 'Source IP', 'tags':['Source IP', str(client)]}
                                 art_res = post_art(alert_id_Hive, art_data, False)
                                 if art_res.status_code == 201:
                                     pass
@@ -654,7 +673,7 @@ def Live_Fetch():
                             for i in single_alert_J['local_destination_address_ids'][:limit_art]:
                                 get_dst_id(i)
                                 art_ip = get_id_res_json['local_destination_ip']
-                                art_data = {'dataType': 'ip','data': art_ip, 'message': 'Destination IP', 'tags':['Destination IP']}
+                                art_data = {'dataType': 'ip','data': art_ip, 'message': 'Destination IP', 'tags':['Destination IP', str(client)]}
                                 art_res = post_art(alert_id_Hive, art_data, False)
                                 if art_res.status_code == 201:
                                     pass
@@ -683,5 +702,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         lognzip("critical", "Service Stopped by a KillSignal ")
     except Exception as E:
-        lognzip("critical", f"{E} ")
+        tb = traceback.format_exc()
+        lognzip("critical", f"{E}\n{tb}")
 

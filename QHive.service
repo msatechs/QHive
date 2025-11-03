@@ -10,4 +10,4 @@ KillSignal=SIGINT
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=thehive.service
